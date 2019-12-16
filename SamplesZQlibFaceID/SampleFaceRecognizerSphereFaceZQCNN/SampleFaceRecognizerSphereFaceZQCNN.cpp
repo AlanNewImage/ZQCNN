@@ -1,3 +1,4 @@
+#if defined(_WIN32)
 #include "ZQ_FaceRecognizerSphereFaceZQCNN.h"
 #include "ZQ_CNN_CompileConfig.h"
 #if ZQ_CNN_USE_BLAS_GEMM
@@ -45,8 +46,8 @@ int main()
 		return EXIT_FAILURE;
 	}
 
-	Mat img0 = imread("data\\00.jpg");
-	Mat img1 = imread("data\\01.jpg");
+	Mat img0 = imread("data/00.jpg");
+	Mat img1 = imread("data/01.jpg");
 
 	for (int it = 0; it < 10; it++)
 	{
@@ -66,3 +67,12 @@ int main()
 	}
 	return EXIT_SUCCESS;
 }
+
+#else
+#include <stdio.h>
+int main(int argc, const char** argv)
+{
+	printf("%s only support windows\n", argv[0]);
+	return 0;
+}
+#endif

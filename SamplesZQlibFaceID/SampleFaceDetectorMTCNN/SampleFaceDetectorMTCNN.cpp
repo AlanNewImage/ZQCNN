@@ -1,3 +1,4 @@
+#if defined(_WIN32)
 #include "ZQ_FaceDetectorMTCNN.h"
 #include "opencv2\opencv.hpp"
 #include <iostream>
@@ -56,7 +57,7 @@ int main()
 		return EXIT_FAILURE;
 	}
 	
-	Mat img = imread("data\\4.jpg");
+	Mat img = imread("data/4.jpg");
 	vector<ZQ_CNN_BBox> result_mtcnn;
 	int iters = 1000;
 	double t1 = omp_get_wtime();
@@ -81,3 +82,12 @@ int main()
 	delete mtcnn;
 	return EXIT_SUCCESS;
 }
+
+#else
+#include <stdio.h>
+int main(int argc, const char** argv)
+{
+	printf("%s only support windows\n", argv[0]);
+	return 0;
+}
+#endif

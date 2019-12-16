@@ -1,7 +1,26 @@
+#if defined(_WIN32)
 #include <intrin.h>
+#else
+#include <x86intrin.h>
+#endif
 #include <omp.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "ZQ_CNN_CompileConfig.h"
+
+#if ZQ_CNN_USE_FMADD128
+#define zq_mm_fmadd_ps _mm_fmadd_ps
+#else
+#define zq_mm_fmadd_ps(A, B, C) _mm_add_ps(_mm_mul_ps(A, B), C)
+#endif
+
+#if ZQ_CNN_USE_FMADD256
+#define zq_mm256_fmadd_ps _mm256_fmadd_ps
+#else
+#define zq_mm256_fmadd_ps(A, B, C) _mm256_add_ps(_mm256_mul_ps(A, B), C)
+#endif
+
+
 
 #define sum_sse_q (q[0]+q[1]+q[2]+q[3])
 #define sum_avx_q (q[0]+q[1]+q[2]+q[3]+q[4]+q[5]+q[6]+q[7])
@@ -382,7 +401,7 @@ void MatMul5_ABt(int M, int N, int K, const float* A, int lda, const float* Bt, 
 	register __m128 sum10, sum11, sum12, sum13;
 	register __m128 sum20, sum21, sum22, sum23;
 	register __m128 sum30, sum31, sum32, sum33;
-	__declspec(align(16)) float q[4];
+	ZQ_DECLSPEC_ALIGN16 float q[4];
 	const float *A_row_ptr0, *A_row_ptr1, *A_row_ptr2, *A_row_ptr3;
 	const float *B_row_ptr0, *B_row_ptr1, *B_row_ptr2, *B_row_ptr3;
 	float *C_row_ptr0, *C_row_ptr1, *C_row_ptr2, *C_row_ptr3;
@@ -429,22 +448,22 @@ void MatMul5_ABt(int M, int N, int K, const float* A, int lda, const float* Bt, 
 				b1 = _mm_load_ps(B_c_ptr1);
 				b2 = _mm_load_ps(B_c_ptr2);
 				b3 = _mm_load_ps(B_c_ptr3);
-				sum00 = _mm_fmadd_ps(a0, b0, sum00);
-				sum01 = _mm_fmadd_ps(a0, b1, sum01);
-				sum02 = _mm_fmadd_ps(a0, b2, sum02);
-				sum03 = _mm_fmadd_ps(a0, b3, sum03);
-				sum10 = _mm_fmadd_ps(a1, b0, sum10);
-				sum11 = _mm_fmadd_ps(a1, b1, sum11);
-				sum12 = _mm_fmadd_ps(a1, b2, sum12);
-				sum13 = _mm_fmadd_ps(a1, b3, sum13);
-				sum20 = _mm_fmadd_ps(a2, b0, sum20);
-				sum21 = _mm_fmadd_ps(a2, b1, sum21);
-				sum22 = _mm_fmadd_ps(a2, b2, sum22);
-				sum23 = _mm_fmadd_ps(a2, b3, sum23);
-				sum30 = _mm_fmadd_ps(a3, b0, sum30);
-				sum31 = _mm_fmadd_ps(a3, b1, sum31);
-				sum32 = _mm_fmadd_ps(a3, b2, sum32);
-				sum33 = _mm_fmadd_ps(a3, b3, sum33);
+				sum00 = zq_mm_fmadd_ps(a0, b0, sum00);
+				sum01 = zq_mm_fmadd_ps(a0, b1, sum01);
+				sum02 = zq_mm_fmadd_ps(a0, b2, sum02);
+				sum03 = zq_mm_fmadd_ps(a0, b3, sum03);
+				sum10 = zq_mm_fmadd_ps(a1, b0, sum10);
+				sum11 = zq_mm_fmadd_ps(a1, b1, sum11);
+				sum12 = zq_mm_fmadd_ps(a1, b2, sum12);
+				sum13 = zq_mm_fmadd_ps(a1, b3, sum13);
+				sum20 = zq_mm_fmadd_ps(a2, b0, sum20);
+				sum21 = zq_mm_fmadd_ps(a2, b1, sum21);
+				sum22 = zq_mm_fmadd_ps(a2, b2, sum22);
+				sum23 = zq_mm_fmadd_ps(a2, b3, sum23);
+				sum30 = zq_mm_fmadd_ps(a3, b0, sum30);
+				sum31 = zq_mm_fmadd_ps(a3, b1, sum31);
+				sum32 = zq_mm_fmadd_ps(a3, b2, sum32);
+				sum33 = zq_mm_fmadd_ps(a3, b3, sum33);
 				A_c_ptr0 += mm_align_size;
 				A_c_ptr1 += mm_align_size;
 				A_c_ptr2 += mm_align_size;
@@ -525,10 +544,10 @@ void MatMul5_ABt(int M, int N, int K, const float* A, int lda, const float* Bt, 
 				a2 = _mm_load_ps(A_c_ptr2);
 				a3 = _mm_load_ps(A_c_ptr3);
 				b0 = _mm_load_ps(B_c_ptr0);
-				sum00 = _mm_fmadd_ps(a0, b0, sum00);
-				sum10 = _mm_fmadd_ps(a1, b0, sum10);
-				sum20 = _mm_fmadd_ps(a2, b0, sum20);
-				sum30 = _mm_fmadd_ps(a3, b0, sum30);
+				sum00 = zq_mm_fmadd_ps(a0, b0, sum00);
+				sum10 = zq_mm_fmadd_ps(a1, b0, sum10);
+				sum20 = zq_mm_fmadd_ps(a2, b0, sum20);
+				sum30 = zq_mm_fmadd_ps(a3, b0, sum30);
 				A_c_ptr0 += mm_align_size;
 				A_c_ptr1 += mm_align_size;
 				A_c_ptr2 += mm_align_size;
@@ -577,10 +596,10 @@ void MatMul5_ABt(int M, int N, int K, const float* A, int lda, const float* Bt, 
 				b1 = _mm_load_ps(B_c_ptr1);
 				b2 = _mm_load_ps(B_c_ptr2);
 				b3 = _mm_load_ps(B_c_ptr3);
-				sum00 = _mm_fmadd_ps(a0, b0, sum00);
-				sum01 = _mm_fmadd_ps(a0, b1, sum01);
-				sum02 = _mm_fmadd_ps(a0, b2, sum02);
-				sum03 = _mm_fmadd_ps(a0, b3, sum03);
+				sum00 = zq_mm_fmadd_ps(a0, b0, sum00);
+				sum01 = zq_mm_fmadd_ps(a0, b1, sum01);
+				sum02 = zq_mm_fmadd_ps(a0, b2, sum02);
+				sum03 = zq_mm_fmadd_ps(a0, b3, sum03);
 
 				A_c_ptr0 += mm_align_size;
 				B_c_ptr0 += mm_align_size;
@@ -616,7 +635,7 @@ void MatMul5_ABt(int M, int N, int K, const float* A, int lda, const float* Bt, 
 			{
 				a0 = _mm_load_ps(A_c_ptr0);
 				b0 = _mm_load_ps(B_c_ptr0);
-				sum00 = _mm_fmadd_ps(a0, b0, sum00);
+				sum00 = zq_mm_fmadd_ps(a0, b0, sum00);
 				A_c_ptr0 += mm_align_size;
 				B_c_ptr0 += mm_align_size;
 			}
@@ -645,7 +664,7 @@ void MatMul6_ABt(int M, int N, int K, const float* A, int lda, const float* Bt, 
 	register __m256 sum10, sum11, sum12, sum13;
 	register __m256 sum20, sum21, sum22, sum23;
 	register __m256 sum30, sum31, sum32, sum33;
-	__declspec(align(32)) float q[8];
+	ZQ_DECLSPEC_ALIGN32 float q[8];
 	const float *A_row_ptr0, *A_row_ptr1, *A_row_ptr2, *A_row_ptr3;
 	const float *B_row_ptr0, *B_row_ptr1, *B_row_ptr2, *B_row_ptr3;
 	float *C_row_ptr0, *C_row_ptr1, *C_row_ptr2, *C_row_ptr3;
@@ -692,22 +711,22 @@ void MatMul6_ABt(int M, int N, int K, const float* A, int lda, const float* Bt, 
 				b1 = _mm256_load_ps(B_c_ptr1);
 				b2 = _mm256_load_ps(B_c_ptr2);
 				b3 = _mm256_load_ps(B_c_ptr3);
-				sum00 = _mm256_fmadd_ps(a0, b0, sum00);
-				sum01 = _mm256_fmadd_ps(a0, b1, sum01);
-				sum02 = _mm256_fmadd_ps(a0, b2, sum02);
-				sum03 = _mm256_fmadd_ps(a0, b3, sum03);
-				sum10 = _mm256_fmadd_ps(a1, b0, sum10);
-				sum11 = _mm256_fmadd_ps(a1, b1, sum11);
-				sum12 = _mm256_fmadd_ps(a1, b2, sum12);
-				sum13 = _mm256_fmadd_ps(a1, b3, sum13);
-				sum20 = _mm256_fmadd_ps(a2, b0, sum20);
-				sum21 = _mm256_fmadd_ps(a2, b1, sum21);
-				sum22 = _mm256_fmadd_ps(a2, b2, sum22);
-				sum23 = _mm256_fmadd_ps(a2, b3, sum23);
-				sum30 = _mm256_fmadd_ps(a3, b0, sum30);
-				sum31 = _mm256_fmadd_ps(a3, b1, sum31);
-				sum32 = _mm256_fmadd_ps(a3, b2, sum32);
-				sum33 = _mm256_fmadd_ps(a3, b3, sum33);
+				sum00 = zq_mm256_fmadd_ps(a0, b0, sum00);
+				sum01 = zq_mm256_fmadd_ps(a0, b1, sum01);
+				sum02 = zq_mm256_fmadd_ps(a0, b2, sum02);
+				sum03 = zq_mm256_fmadd_ps(a0, b3, sum03);
+				sum10 = zq_mm256_fmadd_ps(a1, b0, sum10);
+				sum11 = zq_mm256_fmadd_ps(a1, b1, sum11);
+				sum12 = zq_mm256_fmadd_ps(a1, b2, sum12);
+				sum13 = zq_mm256_fmadd_ps(a1, b3, sum13);
+				sum20 = zq_mm256_fmadd_ps(a2, b0, sum20);
+				sum21 = zq_mm256_fmadd_ps(a2, b1, sum21);
+				sum22 = zq_mm256_fmadd_ps(a2, b2, sum22);
+				sum23 = zq_mm256_fmadd_ps(a2, b3, sum23);
+				sum30 = zq_mm256_fmadd_ps(a3, b0, sum30);
+				sum31 = zq_mm256_fmadd_ps(a3, b1, sum31);
+				sum32 = zq_mm256_fmadd_ps(a3, b2, sum32);
+				sum33 = zq_mm256_fmadd_ps(a3, b3, sum33);
 				A_c_ptr0 += mm_align_size;
 				A_c_ptr1 += mm_align_size;
 				A_c_ptr2 += mm_align_size;
@@ -788,10 +807,10 @@ void MatMul6_ABt(int M, int N, int K, const float* A, int lda, const float* Bt, 
 				a2 = _mm256_load_ps(A_c_ptr2);
 				a3 = _mm256_load_ps(A_c_ptr3);
 				b0 = _mm256_load_ps(B_c_ptr0);
-				sum00 = _mm256_fmadd_ps(a0, b0, sum00);
-				sum10 = _mm256_fmadd_ps(a1, b0, sum10);
-				sum20 = _mm256_fmadd_ps(a2, b0, sum20);
-				sum30 = _mm256_fmadd_ps(a3, b0, sum30);
+				sum00 = zq_mm256_fmadd_ps(a0, b0, sum00);
+				sum10 = zq_mm256_fmadd_ps(a1, b0, sum10);
+				sum20 = zq_mm256_fmadd_ps(a2, b0, sum20);
+				sum30 = zq_mm256_fmadd_ps(a3, b0, sum30);
 				A_c_ptr0 += mm_align_size;
 				A_c_ptr1 += mm_align_size;
 				A_c_ptr2 += mm_align_size;
@@ -840,10 +859,10 @@ void MatMul6_ABt(int M, int N, int K, const float* A, int lda, const float* Bt, 
 				b1 = _mm256_load_ps(B_c_ptr1);
 				b2 = _mm256_load_ps(B_c_ptr2);
 				b3 = _mm256_load_ps(B_c_ptr3);
-				sum00 = _mm256_fmadd_ps(a0, b0, sum00);
-				sum01 = _mm256_fmadd_ps(a0, b1, sum01);
-				sum02 = _mm256_fmadd_ps(a0, b2, sum02);
-				sum03 = _mm256_fmadd_ps(a0, b3, sum03);
+				sum00 = zq_mm256_fmadd_ps(a0, b0, sum00);
+				sum01 = zq_mm256_fmadd_ps(a0, b1, sum01);
+				sum02 = zq_mm256_fmadd_ps(a0, b2, sum02);
+				sum03 = zq_mm256_fmadd_ps(a0, b3, sum03);
 
 				A_c_ptr0 += mm_align_size;
 				B_c_ptr0 += mm_align_size;
@@ -879,7 +898,7 @@ void MatMul6_ABt(int M, int N, int K, const float* A, int lda, const float* Bt, 
 			{
 				a0 = _mm256_load_ps(A_c_ptr0);
 				b0 = _mm256_load_ps(B_c_ptr0);
-				sum00 = _mm256_fmadd_ps(a0, b0, sum00);
+				sum00 = zq_mm256_fmadd_ps(a0, b0, sum00);
 				A_c_ptr0 += mm_align_size;
 				B_c_ptr0 += mm_align_size;
 			}

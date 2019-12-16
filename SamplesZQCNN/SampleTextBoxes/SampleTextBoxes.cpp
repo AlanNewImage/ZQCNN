@@ -26,7 +26,7 @@ int main()
 #elif ZQ_CNN_USE_MKL_GEMM
 	mkl_set_num_threads(thread_num);
 #endif
-	Mat img0 = cv::imread("data\\text4.jpg", 1);
+	Mat img0 = cv::imread("data/0113.jpg", 1);
 	if (img0.empty())
 	{
 		cout << "empty image\n";
@@ -35,7 +35,7 @@ int main()
 	//resize(img0, img0, Size(), 0.5, 0.5);
 
 	ZQ_CNN_TextBoxes detector;
-	if (!detector.Init("model\\TextBoxes_icdar13.zqparams", "model\\TextBoxes_icdar13.nchwbin", "detection_out"))
+	if (!detector.Init("model/TextBoxes_icdar13.zqparams", "model/TextBoxes_icdar13.nchwbin", "detection_out"))
 	{
 		printf("failed to init detector!\n");
 		return false;
@@ -75,7 +75,11 @@ int main()
 		cv::Rect rect(bbox.col1, bbox.row1, bbox.col2 - bbox.col1 + 1, bbox.row2 - bbox.row1 + 1);
 		cv::rectangle(img0, rect, cv::Scalar(0, 0, 255), 2);
 		char buff[300];
+#if defined(_WIN32)
 		sprintf_s(buff, 300, "%s: %.2f", kClassNames[bbox.label], bbox.score);
+#else
+		sprintf(buff, "%s: %.2f", kClassNames[bbox.label], bbox.score);
+#endif
 		cv::putText(img0, buff, cv::Point(bbox.col1, bbox.row1), FONT_HERSHEY_PLAIN, 1, Scalar(0, 255, 0));
 	}
 

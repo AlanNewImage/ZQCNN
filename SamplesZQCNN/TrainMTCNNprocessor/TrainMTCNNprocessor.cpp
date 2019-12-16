@@ -37,15 +37,15 @@ int main(int argc, const char** argv)
 		return EXIT_FAILURE;
 	}
 
-	if (_strcmpi(argv[1], "generate_wider_prob") == 0)
+	if (strcmp(argv[1], "generate_wider_prob") == 0)
 	{
 		return generate_wider_prob(argc, argv);
 	}
-	else if (_strcmpi(argv[1], "generate_data") == 0)
+	else if (strcmp(argv[1], "generate_data") == 0)
 	{
 		return generate_data(argc, argv);
 	}
-	else if (_strcmpi(argv[1], "generate_landmark") == 0)
+	else if (strcmp(argv[1], "generate_landmark") == 0)
 		return generate_landmark(argc, argv);
 	
 	printf("unknown method: %s\n", argv[1]);
@@ -61,8 +61,8 @@ int generate_wider_prob(int argc, const char** argv)
 	}
 	const char* anno_file = argv[2];
 	const char* prob_file = argv[3];
-	const char* param_file = "model\\det3.zqparams";
-	const char* model_file = "model\\det3_bgr.nchwbin";
+	const char* param_file = "model/det3.zqparams";
+	const char* model_file = "model/det3_bgr.nchwbin";
 	const char* out_blob_name = "prob1";
 	if (argc >= 5)
 		param_file = argv[4];
